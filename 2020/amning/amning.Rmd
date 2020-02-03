@@ -91,8 +91,6 @@ circle <- amning %>%
     scale_y_continuous(breaks = seq(0,21,3),
                        labels = glue('{str_pad(seq(0,21,3), 2, "left", "0")}:00')) +
     theme(axis.text.y = element_blank())
-
-
 ```
 
 ```{r fig_varighed}
@@ -108,10 +106,7 @@ varig <- amning %>%
                                title.hjust = 0.5, nrow = 1,
                                label.position = "bottom",
                                override.aes = list(color = NA),
-                               reverse = T)
-           )
-  
-
+                               reverse = T))
 ```
 
 ```{r fig_antal}
@@ -138,7 +133,7 @@ circle /
   plot_layout(height = c(5,1),
               guides = 'collect')
 
-ggsave("AMN.PDF", dpi = 300, width = 5, height = 7.07)
+ggsave("AMN.PDF", dpi = 300, width = 10, height = 14.14)
 
 ```
 
