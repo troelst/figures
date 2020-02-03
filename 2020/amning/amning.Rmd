@@ -21,19 +21,14 @@ library(lubridate)
 library(glue)
 library(ggtext)
 library(showtext)
-library(extrafont)
 library(patchwork)
 
 font_add_google("Roboto Mono", "Roboto Mono")
+```
 
-## ggplot theme
+```{r ggplot theme}
 theme_set(theme_minimal(base_family = "Roboto Mono", base_size = 9))
-theme_update(
-             plot.background = element_rect(fill = "#160447",
-                                             color = "grey20",
-                                             size = 3),
-             panel.background = element_rect(fill = "#160447", color = "#160447"),
-             axis.text.y = element_blank(),
+theme_update(axis.text.y = element_blank(),
              axis.title = element_blank(),
              axis.ticks = element_blank(),
              legend.position = "bottom",
@@ -43,15 +38,12 @@ theme_update(
              legend.key.height = unit(0.75, "lines"), 
              legend.key.width = unit(5, "lines"),
              plot.margin = margin(10,10,10,10))
-
 ```
 
 ```{r load}
 DAT_amning <- read_csv("amning.txt"
                        , col_names = c("Amning"))
 ```
-
-
 
 ```{r transform}
 amning <- DAT_amning %>% 
@@ -75,8 +67,7 @@ amning <- DAT_amning %>%
 
 ```
 
-```{r main figur}
-
+```{r fig_circle}
 circle <- amning %>% 
   select(dato, amn_dec, pau_dec, tid) %>% 
   pivot_longer(amn_dec:pau_dec, names_to = "type", values_to = "value") %>% 
@@ -104,8 +95,7 @@ circle <- amning %>%
 
 ```
 
-```{r varighed}
-
+```{r fig_varighed}
 varig <- amning %>% 
   filter(varighed > 0) %>% 
   ggplot(aes(varighed %>% as.numeric())) + 
@@ -124,7 +114,7 @@ varig <- amning %>%
 
 ```
 
-```{r antal}
+```{r fig_antal}
 
 antal <- amning %>% 
   filter(varighed > 0) %>% 
@@ -142,22 +132,10 @@ antal <- amning %>%
 
 ```
 
-```{r}
-
-layout <- " 
-  AAA
-  AAA
-  AAA
-  B#C
-"
-
-circle / (varig + antal) + plot_layout(design = layout,
-                                      guides = 'collect')
-
+```{r fig_final}
 circle / (plot_spacer() + varig + antal + plot_spacer() + plot_layout(widths = c(0.5,4,4,0.5))) + plot_layout(height = c(5,1),
                                        guides = 'collect')
 
-# + plot_layout()
 # ggsave("TEST.PDF", dpi = 300, width = 5, height = 7.07)
 ```
 
