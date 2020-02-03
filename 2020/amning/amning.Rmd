@@ -133,9 +133,12 @@ antal <- amning %>%
 ```
 
 ```{r fig_final}
-circle / (plot_spacer() + varig + antal + plot_spacer() + plot_layout(widths = c(0.5,4,4,0.5))) + plot_layout(height = c(5,1),
-                                       guides = 'collect')
+circle / 
+  (plot_spacer() + varig + antal + plot_spacer() + plot_layout(widths = c(0.5,4,4,0.5))) + 
+  plot_layout(height = c(5,1),
+              guides = 'collect')
 
-# ggsave("TEST.PDF", dpi = 300, width = 5, height = 7.07)
+ggsave("AMN.PDF", dpi = 300, width = 5, height = 7.07)
+
 ```
 
