@@ -40,6 +40,10 @@ theme_update(axis.text.y = element_blank(),
              plot.margin = margin(10,10,10,10))
 ```
 
+```{r colors}
+skin_col <- c("#FAE3C6")
+```
+
 ```{r load}
 DAT_amning <- read_csv("amning.txt"
                        , col_names = c("Amning"))
