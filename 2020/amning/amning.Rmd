@@ -45,6 +45,8 @@ skin_col <- c("#FAE3D8",
               "#E0728F",
               "#E3ACBD",
               "#FDC0D3")
+
+milk_col <- "#FFF9D6"
 ```
 
 ```{r load}
