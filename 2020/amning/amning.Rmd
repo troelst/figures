@@ -41,7 +41,10 @@ theme_update(axis.text.y = element_blank(),
 ```
 
 ```{r colors}
-skin_col <- c("#FAE3C6")
+skin_col <- c("#FAE3D8",
+              "#E0728F",
+              "#E3ACBD",
+              "#FDC0D3")
 ```
 
 ```{r load}
