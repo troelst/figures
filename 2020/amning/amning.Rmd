@@ -47,6 +47,9 @@ skin_col <- c("#FAE3D8",
               "#FDC0D3")
 
 milk_col <- "#FFF9D6"
+
+back_col <- #72ADA7"
+
 ```
 
 ```{r load}
