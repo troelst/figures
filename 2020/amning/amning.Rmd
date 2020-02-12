@@ -41,10 +41,9 @@ theme_update(axis.text.y = element_blank(),
 ```
 
 ```{r colors}
-skin_col <- c("#FAE3D8",
-              "#E0728F",
-              "#E3ACBD",
-              "#FDC0D3")
+skin_col <- c("#E0728F",
+              "#E696A3", #FDC0D3
+              "#FDCECD") #FAE3D8
 
 milk_col <- "#FFF9D6"
 
@@ -80,15 +79,17 @@ amning <- DAT_amning %>%
 ```
 
 ```{r fig_circle}
+(
 circle <- amning %>% 
   select(dato, amn_dec, pau_dec, tid) %>% 
   pivot_longer(amn_dec:pau_dec, names_to = "type", values_to = "value") %>% 
   filter(month(dato) == 1, 
-         dato != dmy("25-01-2020"),
+         dato != max(dato),
          value > 0) %>% 
-  group_by(dato) %>% 
-  mutate(n = row_number()) %>% 
-  ungroup() %>% 
+  add_row(dato = rep(seq(min(.$dato) - days(5),min(.$dato) - days(1), "days"), 20),
+          type = ifelse(dato < min(.$dato) - days(3),"Inner", "Outer"), 
+          value = 24/20) %>% 
+  add_rownumber(dato) %>% 
   ggplot() +
     geom_col(aes(dato, 
                  value, 
@@ -99,10 +100,12 @@ circle <- amning %>%
     labs(x = NULL,
          y = NULL) +
     coord_polar(theta = "y") +
-    scale_x_date(limits = c(dmy("25-12-2019"),dmy("24-01-2020"))) +
     scale_y_continuous(breaks = seq(0,21,3),
                        labels = glue('{str_pad(seq(0,21,3), 2, "left", "0")}:00')) +
-    theme(axis.text.y = element_blank())
+    scale_fill_manual(values = c(milk_col, skin_col)) + #c(milk_col, skin_col)
+    theme(axis.text.y = element_blank(),
+          panel.grid = element_blank())
+ )
 ```
 
 ```{r fig_varighed}
