@@ -87,7 +87,7 @@ circle <- amning %>%
          dato != max(dato),
          value > 0) %>% 
   add_row(dato = rep(seq(min(.$dato) - days(5),min(.$dato) - days(1), "days"), 20),
-          type = ifelse(dato < min(.$dato) - days(3),"Inner", "Outer"), 
+          type = ifelse(dato < min(.$dato) - days(3), "Inner", "Outer"), 
           value = 24/20) %>% 
   add_rownumber(dato) %>% 
   ggplot() +
