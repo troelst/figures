@@ -142,6 +142,25 @@ antal <- amning %>%
 
 ```
 
+```{r fig_antal_var}
+(
+  amning %>% 
+  filter(varighed > 0) %>% 
+  group_by(dato) %>% 
+  summarise(antal = n(),
+            varighed = mean(as.numeric(varighed), na.rm = T)) %>% 
+  filter(antal< 20) %>% 
+  ggplot() + 
+    geom_col(aes(dato, varighed),
+             alpha = 0.3)+
+    geom_smooth(aes(dato, antal),
+                se = F) +
+    geom_point(aes(dato, antal))
+  
+)
+  
+```
+
 ```{r fig_final}
 circle / 
   (plot_spacer() + varig + antal + plot_spacer() + plot_layout(widths = c(0.5,4,4,0.5))) + 
