@@ -28,8 +28,7 @@ font_add_google("Roboto Mono", "Roboto Mono")
 
 ```{r ggplot theme}
 theme_set(theme_minimal(base_family = "Roboto Mono", base_size = 9))
-theme_update(axis.text.y = element_blank(),
-             axis.title = element_blank(),
+theme_update(axis.title = element_blank(),
              axis.ticks = element_blank(),
              legend.position = "bottom",
              legend.title = element_blank(),
@@ -148,17 +147,23 @@ antal <- amning %>%
   filter(varighed > 0) %>% 
   group_by(dato) %>% 
   summarise(antal = n(),
-            varighed = mean(as.numeric(varighed), na.rm = T)) %>% 
+            var = mean(as.numeric(varighed), na.rm = T),
+            var_semin = var - sd(as.numeric(varighed)),
+            var_semax = var + sd(as.numeric(varighed))) %>% 
   filter(antal< 20) %>% 
   ggplot() + 
-    geom_col(aes(dato, varighed),
-             alpha = 0.3)+
+    geom_col(aes(dato, var),
+             alpha = 0.3) +
+    geom_errorbar(aes(x = dato, ymin = var_semin, ymax = var_semax),
+                  width = 0, size = 1, alpha = 0.4) +
     geom_smooth(aes(dato, antal),
                 se = F) +
-    geom_point(aes(dato, antal))
+    geom_point(aes(dato, antal)) +
+    scale_x_date(labels = label_date_short(), date_breaks = "1 month") +
+    theme(panel.grid = element_blank(),
+          axis.text.y = element_text())
   
 )
-  
 ```
 
 ```{r fig_final}
