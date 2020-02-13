@@ -166,6 +166,42 @@ antal <- amning %>%
 )
 ```
 
+```{r fig_circle_facet}
+
+amning %>% 
+  select(dato, amn_dec, pau_dec, tid) %>% 
+  pivot_longer(amn_dec:pau_dec, names_to = "type", values_to = "value") %>% 
+  filter(dato != max(dato),
+         value > 0) %>% 
+  group_by(md = floor_date(dato, "month")) %>% 
+  mutate(day = cumsum((dato != lag(dato)) %>% replace_na(T))) %>% 
+  ungroup() %>% 
+  add_row(md = unique(.$md),
+          day = list(0:-4),
+          type = list(c("Outer","Outer","Outer","Inner","Inner")),
+          dato = unique(.$md),
+          value = 24) %>% 
+  unnest() %>% 
+  add_rownumber(dato) %>% 
+  ggplot() +
+    geom_col(aes(day, 
+                 value, 
+                 fill = type, 
+                 group = n),
+             width = 0.5,
+             show.legend = F) +
+    labs(x = NULL,
+         y = NULL) +
+    coord_polar(theta = "y") +
+    facet_wrap(~md) +
+    scale_y_continuous(breaks = seq(0,21,3),
+                       labels = glue('{str_pad(seq(0,21,3), 2, "left", "0")}:00')) +
+    scale_fill_manual(values = c(milk_col, skin_col)) + #c(milk_col, skin_col)
+    theme(axis.text.y = element_blank(),
+          panel.grid = element_blank())
+
+```
+
 ```{r fig_final}
 circle / 
   (plot_spacer() + varig + antal + plot_spacer() + plot_layout(widths = c(0.5,4,4,0.5))) + 
