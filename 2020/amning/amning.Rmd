@@ -58,7 +58,7 @@ DAT_amning <- read_csv("amning.txt"
 ```{r transform}
 amning <- DAT_amning %>% 
   mutate(dato = ifelse(str_detect(Amning, "DØGN"), 
-                       str_extract(Amning, "\\d*$") %>% as.numeric(),
+                       str_extract(Amning, "\\d+") %>% as.numeric(),
                        NA),
          dato = dmy("01-12-2019") + days(dato)) %>% 
   fill(dato) %>% 
