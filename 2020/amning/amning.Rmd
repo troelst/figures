@@ -57,20 +57,38 @@ DAT_amning <- read_csv("amning.txt"
 
 ```{r transform}
 amning <- DAT_amning %>% 
-  mutate(dato = ifelse(str_detect(Amning, "DØGN"), 
+  mutate(doegn = ifelse(str_detect(Amning, "DØGN"), 
                        str_extract(Amning, "\\d+") %>% as.numeric(),
                        NA),
-         dato = dmy("01-12-2019") + days(dato)) %>% 
-  fill(dato) %>% 
+         dato = dmy("01-12-2019") + days(doegn)) %>% 
+  fill(doegn, dato) %>% 
   filter(!str_detect(Amning, "DØGN"),
          str_detect(Amning, "\\d")) %>% 
   mutate(tid = str_extract(Amning, "\\d+\\.\\d+"),
-         varighed = str_extract(Amning, "(?<=\\()\\d+")) %>% 
-  add_row(dato = c(.$dato %>% unique,max(.$dato) + days(1)), tid = "00.00", varighed = 0) %>% 
+         varighed = str_extract(Amning, "(?<=\\()\\d+") %>% as.numeric) %>% 
+  add_row(dato = c(.$dato %>% unique(), max(.$dato) + days(1)), 
+          tid = "00.00",
+          varighed = 0, 
+          doegn = c(.$doegn %>% unique(), max(.$doegn) +1)) %>% 
   arrange(dato, tid) %>% 
-  mutate(dato_start = glue("{dato} {tid}") %>% ymd_hm(),
-         dato_slut= dato_start + minutes(varighed),
-         amn_int = dato_start %--% dato_slut,
+  mutate(dato_start = glue("{dato} {tid}") %>% ymd_hm()) %>%  
+  group_by(dato_start) %>% 
+  mutate(dato_start_korr = ifelse(floor_date(dato_start, "day") == floor_date(dato_start + minutes(varighed), "day"), 
+                                  list(dato_start %>% as_datetime()), 
+                                  list(c(dato_start %>% as_datetime(), 
+                                         floor_date(dato_start + days(1), "day") %>% as_datetime()))),
+         varighed_korr = ifelse(floor_date(dato_start, "day") == floor_date(dato_start + minutes(varighed), "day"), 
+                                list(varighed), 
+                                list(c((floor_date(dato_start + days(1), "day") - dato_start) %>% as.numeric(), 
+                                       ((dato_start + minutes(varighed)) - floor_date(dato_start + days(1), "day")) %>% as.numeric())))
+         ) %>% 
+  ungroup() %>% 
+  unnest(dato_start_korr, varighed_korr) %>% 
+  select(-dato_start, -varighed) %>% 
+  rename("dato_start" = dato_start_korr,
+         "varighed" = varighed_korr) %>% 
+  mutate(dato_slut= dato_start + minutes(varighed),
+         amn_int = dato_start %--% dato_slut, 
          amn_dec = amn_int / hours(1),
          pau_int = dato_slut %--% lead(dato_start),
          pau_dec = pau_int / hours(1))
