@@ -71,26 +71,23 @@ amning <- DAT_amning %>%
           varighed = 0, 
           doegn = c(.$doegn %>% unique(), max(.$doegn) +1)) %>% 
   arrange(dato, tid) %>% 
-  mutate(dato_start = glue("{dato} {tid}") %>% ymd_hm()) %>%  
-  group_by(dato_start) %>% 
-  mutate(dato_start_korr = ifelse(floor_date(dato_start, "day") == floor_date(dato_start + minutes(varighed), "day"), 
-                                  list(dato_start %>% as_datetime()), 
-                                  list(c(dato_start %>% as_datetime(), 
-                                         floor_date(dato_start + days(1), "day") %>% as_datetime()))),
-         varighed_korr = ifelse(floor_date(dato_start, "day") == floor_date(dato_start + minutes(varighed), "day"), 
-                                list(varighed), 
-                                list(c((floor_date(dato_start + days(1), "day") - dato_start) %>% as.numeric(), 
-                                       ((dato_start + minutes(varighed)) - floor_date(dato_start + days(1), "day")) %>% as.numeric())))
-         ) %>% 
+  mutate(dato_start = glue("{dato} {tid}") %>% ymd_hm(),
+         dato_slut= dato_start + minutes(varighed)) %>% 
+  group_by(dato_start) %>%
+  mutate(dato_start_corr = ifelse(floor_date(dato_start, "day") == floor_date(dato_slut, "day"),
+                             list(dato_start),
+                             list(c(dato_start, floor_date(dato_start, "day") + days(1)))),
+         dato_slut_corr = ifelse(floor_date(dato_start, "day") == floor_date(dato_slut, "day"),
+                             list(dato_slut),
+                             list(c(floor_date(dato_slut, "day") - seconds(1), dato_slut))),
+         doegn_corr = ifelse(floor_date(dato_start, "day") == floor_date(dato_slut, "day"),
+                             list(doegn),
+                             list(c(doegn, doegn + 1 )))) %>% 
   ungroup() %>% 
-  unnest(dato_start_korr, varighed_korr) %>% 
-  select(-dato_start, -varighed) %>% 
-  rename("dato_start" = dato_start_korr,
-         "varighed" = varighed_korr) %>% 
-  mutate(dato_slut= dato_start + minutes(varighed),
-         amn_int = dato_start %--% dato_slut, 
+  unnest(dato_start_corr, dato_slut_corr, doegn_corr) %>% 
+  mutate(amn_int = dato_start_corr %--% dato_slut_corr, 
          amn_dec = amn_int / hours(1),
-         pau_int = dato_slut %--% lead(dato_start),
+         pau_int = dato_slut_corr %--% lead(dato_start_corr),
          pau_dec = pau_int / hours(1))
 
 ```
