@@ -1,0 +1,59 @@
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(hrbrthemes)
+
+polls_data <- read_csv("https://raw.githubusercontent.com/erikgahner/polls/master/polls.csv",
+                  guess_max = 2000)
+
+party_name <- tribble(
+  ~name, ~full_name,
+  "A","Socialdemokratiet",
+  "B","Radikale Venstre",
+  "C","Det Konservative Folkeparti",
+  "D","Nye Borgerlige",
+  "F","SF ‒ Socialistisk Folkeparti",
+  "I","Liberal Alliance",
+  "K","Kristendemokraterne",
+  "O","Dansk Folkeparti",
+  "P","Stram Kurs",
+  "V","Venstre, Danmarks Liberale Parti",
+  "Ø","Enhedslisten ‒ De Rød-Grønne",
+  "Å","Alternativet")
+
+polls <- polls_data %>% 
+  mutate(date = ymd(str_c(year, month, day, sep ="-"))) %>% 
+  pivot_longer(starts_with("party"), names_to = "party", values_to = "share") %>% 
+  mutate(share = share / 100,
+         name = party %>% str_remove("party_") %>% str_to_upper(),
+         name = case_when(name == "OE" ~ "Ø",
+                          name == "AA" ~ "Å",
+                          TRUE ~ name),
+         party_col = case_when(name == "A" ~ "red",
+                               name == "V" ~ "blue",
+                               TRUE ~ "pink")
+         ) %>% 
+  left_join(party_name, "name")
+
+polls %>% 
+  filter(!is.na(share)) %>% 
+  ggplot(aes(date, share)) + 
+    geom_point(aes(col = name, fill = name),
+               alpha = 0.05) +
+    geom_smooth(aes(col = name), se = F) +
+    geom_hline(aes(yintercept = 0.02)) +
+  labs(x = NULL, y = NULL, title = "Polls fra Danmark", subtitle = "Tak til Erik") +
+  scale_y_continuous(labels = percent) +
+  scale_x_date(date_label = "%Y", date_breaks = ) +
+  scale_x_date(label = label_date_short()) +
+  guides(col = guide_legend(nrow = 1,
+                            label.position = "bottom")) +
+  theme_ipsum_rc() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.major.y = element_line(),
+        # axis.text.x = element_text(angle = 90),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.key.height = unit(0.5, "lines"),
+        legend.key.width = unit(2, "lines"))
