@@ -1,0 +1,67 @@
+---
+title: "covid"
+author: "TT"
+date: "13th of March 2020"
+output:
+  html_document:
+  theme: paper
+highlight: kate
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = F)
+```
+
+```{r lib}
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(hrbrthemes)
+library(ggrepel)
+```
+
+```{r data}
+#raw data
+conf_raw <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
+recov_raw <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
+death_raw <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
+
+conf <- conf_raw %>%  
+  rename(country = `Country/Region`,
+         province = `Province/State`) %>% 
+  pivot_longer(matches("\\d+.\\d+.\\d+"), names_to = "date", values_to = "conf") %>%
+  filter(conf > 0) %>% 
+  mutate(date = date %>% mdy()) %>% 
+  group_by(country) %>% 
+  arrange(country, date) %>% 
+  mutate(day = row_number(),
+         new_conf = conf - lag(conf, default = 0))
+```
+
+``` {r figs}
+conf %>% 
+  filter(province == "Denmark" | country %in% c("Sweden", "Norway"),
+         date > dmy("25-02-2020")) %>% 
+  mutate(label = ifelse(date == max(date), country, NA)) %>% 
+  ggplot(aes(date, conf)) +
+    geom_line(aes(col = country), size = 1) +
+    geom_text_repel(aes(label = label),
+                  nudge_x = 0,
+                  direction = "x",
+                  na.rm = TRUE) +
+    scale_color_viridis_d() +
+    scale_x_date(expand = c(0,3)) +
+    labs(x = NULL, y = NULL, title = "COVIR-19 in Scandinavia") +
+    theme_ipsum_rc() +
+    theme(panel.grid.minor = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.major.y = element_line(color = "grey90"),
+          # axis.text.x = element_text(angle = 90),
+          legend.position = "none",
+          legend.title = element_blank(),
+          legend.key.height = unit(0.5, "lines"),
+          legend.key.width = unit(2, "lines"))
+```
