@@ -1,8 +1,28 @@
+---
+title: "POLLS"
+author: "TT"
+date: "13th of March 2020"
+output:
+  html_document:
+  theme: paper
+highlight: kate
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = F)
+```
+
+```{r lib}
 library(tidyverse)
 library(lubridate)
 library(scales)
 library(hrbrthemes)
+```
 
+```{r data}
 polls_data <- read_csv("https://raw.githubusercontent.com/erikgahner/polls/master/polls.csv",
                   guess_max = 2000)
 
@@ -34,7 +54,9 @@ polls <- polls_data %>%
                                TRUE ~ "pink")
          ) %>% 
   left_join(party_name, "name")
+```
 
+``` {r figs}
 polls %>% 
   filter(!is.na(share)) %>% 
   ggplot(aes(date, share)) + 
@@ -57,3 +79,4 @@ polls %>%
         legend.title = element_blank(),
         legend.key.height = unit(0.5, "lines"),
         legend.key.width = unit(2, "lines"))
+```
